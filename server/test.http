@@ -1,1 +1,22 @@
 GET http://localhost:3000/api/pages
+###
+
+// Login
+POST http://localhost:3000/api/login HTTP/1.1
+content-type: application/json
+{
+    "username": "user2",
+    "password": "isSecret"
+}
+
+###
+
+// Verify if user is still authenticated
+GET http://localhost:3000/api/verifyAuth HTTP/1.1
+
+###
+
+// Logout
+DELETE http://localhost:3000/api/logout HTTP/1.1
+
+###
