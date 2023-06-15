@@ -1,21 +1,30 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/_XpznRuT)
-# Exam #12345: "Exam Title"
+# Exam #1: "CMSmall"
 
-## Student: s123456 LASTNAME FIRSTNAME 
+## Student: s317390 FALL SERIGNE CHEIKH TIDIANE SY 
 
 # Server side
 
 ## API Server
 
 - POST `/api/login`
-  - request parameters and request body content
-  - response body content
-- GET `/api/something`
-  - request parameters
-  - response body content
-- POST `/api/something`
-  - request parameters and request body content
-  - response body content
+  - request parameters: None
+  - request body content: 
+    <br> An object having a field `"username"` containing the user's username and a field `"password"` containing the user's password <br>
+    Exemple: {"username": "user2", "password": "isSecret"}
+  - response body content:
+    <br> An object having fields `"id"`, `"username"` and `"role"` containing the saved information of the user <br>
+    Exemple: {"id": 2, "username": "user2", "role": "regular"}
+
+- GET `/api/verifyAuth`
+  - request parameters: None
+  - response body content:
+    <br> If the user is logged: an object with `"id"` and `"username"` fields. If not logged in it returns a not authenticated error.
+
+- POST `/api/logout`
+  - request parameters: None
+  - request body content: None
+  - response body content: confirmation message
 - ...
 
 ## Database Tables
@@ -50,5 +59,7 @@
 
 ## Users Credentials
 
-- username, password (plus any other requested info)
+- user1, guess_my_password
+- user2, isSecret
+- admin@cms.com, secureAdmin
 - username, password (plus any other requested info)
