@@ -99,7 +99,13 @@ app.delete('/api/logout', logout);
 /******************** Front-office and Back-office APIs ********************/
 
 const getAllPages = async (req, res) => {
-    res.status(200).json("Hello World!")
+    try {
+        const pages = await pagesDao.getAllPages();
+        
+        res.status(200).json(pages);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
 }
 
 const getPage = async (req, res) => {
@@ -117,6 +123,9 @@ const deletePage = async (req, res) => {
 const getAllBlocks = async (req, res) => {
 }
 
+const getBlock = async (req, res) => {
+}
+
 const createBlock = async (req, res) => {
 }
 
@@ -132,7 +141,8 @@ app.post('/api/pages', createPage)
 app.put('/api/pages/:id', editPage)
 app.delete('/api/pages/:id/', deletePage)
 app.get('/api/pages/:id/blocks', getAllBlocks)
-app.post('/api/pages/:id/blocks/:id', createBlock)
+app.get('/api/pages/:id/blocks/:id', getBlock)
+app.post('/api/pages/:id/blocks', createBlock)
 app.put('/api/pages/:id/blocks/:id', editBlock)
 app.delete('/api/pages/:id/blocks/:id', deleteBlock)
 
