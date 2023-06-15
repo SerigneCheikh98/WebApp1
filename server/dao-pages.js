@@ -15,7 +15,7 @@ exports.getAllPages = () => {
             reject(err);
           }
           else {
-            const pages = rows.map((page) => { return new Page(page.id, page.title, page.author, page.date, page.publicationDate) })
+            const pages = rows.map((page) => { return new Page(page.id, page.title, page.author, page.date, page.publication_date) })
             resolve(pages);
           }
         });
@@ -30,7 +30,7 @@ exports.getPage = (pageId) => {
             reject(err);
           }
           else {
-            resolve(new Page(row.id, row.title, row.author, row.date, row.publicationDate));
+            resolve(new Page(row.id, row.title, row.author, row.date, row.publication_date));
           }
         });
     });
@@ -38,13 +38,13 @@ exports.getPage = (pageId) => {
 
 exports.createPage = (newPage) => {
     return new Promise((resolve, reject) => {
-        const sql = 'INSERT INTO Pages(title, author, date, publicationDate) VALUES(?,?,?,?)';
-        db.run(sql, [newPage.title, newPage.author, newPage.date.toISOString(), newPage.publicationDate], (err) => {
+        const sql = 'INSERT INTO Pages(title, author, date, publication_date) VALUES(?,?,?,?)';
+        db.run(sql, [newPage.title, newPage.author, newPage.date, newPage.publication_date], function (err) {
           if (err) {
             reject(err);
           }
           else {
-            resolve(true);
+            resolve(new Page(this.lastID, newPage.title, newPage.author, newPage.date, newPage.publication_date));
           }
         });
     });
@@ -53,9 +53,9 @@ exports.createPage = (newPage) => {
 exports.updatePage = (pageId, page) => {
     return new Promise((resolve, reject) => {
         // can not update `date` and `author` fields
-        const sql = `UPDATE Pages SET title=?, publicationDate=? WHERE id=?` ;
+        const sql = `UPDATE Pages SET title=?, publication_date=? WHERE id=?` ;
 
-        db.run(sql, [page.title, page.publicationDate, pageId], (err) => {
+        db.run(sql, [page.title, page.publication_date, pageId], (err) => {
           if (err) {
             reject(err);
           }
@@ -93,10 +93,10 @@ exports.deletePage = (pageId) => {
 
 /******************** Blocks ********************/
 
-exports.getAllBlocks = () => {
+exports.getAllBlocksByPage = (pageId) => {
   return new Promise((resolve, reject) => {
-      const sql = 'SELECT * FROM Blocks';
-      db.all(sql, (err, rows) => {
+      const sql = 'SELECT * FROM Blocks WHERE idPage=?';
+      db.all(sql, [pageId], (err, rows) => {
         if (err) {
           reject(err);
         }

@@ -2,12 +2,12 @@
 
 const dayjs = require('dayjs');
 
-function Page (id, title, author, date, publicationDate) {
+function Page (id, title, author, date, publication_date) {
     this.id = id;
     this.title = title;
     this.author = author;
-    this.date = dayjs(date);
-    this.publicationDate = publicationDate ;
+    this.date = dayjs(date).format('YYYY-MM-DD');
+    this.publication_date = publication_date ;
 }
 
 function Block (id, type, content, idPage) {

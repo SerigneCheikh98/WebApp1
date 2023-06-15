@@ -3,10 +3,14 @@
 const PORT = 3000;
 
 const express = require('express');
+const dayjs = require('dayjs');
+const { check, validationResult, } = require('express-validator');
 
-// Get modules accessing the DB
+
+// Get modules accessing the DB and Model
 const usersDao = require('./dao-users');
 const pagesDao = require('./dao-pages'); 
+const {Page, Block} = require('./pb-constructors');
 
 // Middlewares
 const morgan = require('morgan');
@@ -57,6 +61,11 @@ const isLoggedIn = (req, res, next) => {
     return res.status(401).json({ error: 'Not authorized' });
 }
 
+// This function is used to format express-validator errors as strings
+const errorFormatter = ({ location, msg, param, value, nestedErrors }) => {
+    return `${location}[${param}]: ${msg}`;
+};
+  
 /******************** Authentication APIs ********************/
 
 const login = async (req, res, next) => {
@@ -96,7 +105,7 @@ app.get('/api/verifyAuth', verifyAuth);
 app.delete('/api/logout', logout);
 
 
-/******************** Front-office and Back-office APIs ********************/
+/******************** Front-office APIs ********************/
 
 const getAllPages = async (req, res) => {
     try {
@@ -108,19 +117,97 @@ const getAllPages = async (req, res) => {
     }
 }
 
+const getAllBlocks = async (req, res) => {
+    const pageId = req.params.pageId;
+
+    try {
+        const blocks = await pagesDao.getAllBlocksByPage(pageId);
+
+        res.status(200).json(blocks);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+}
+
 const getPage = async (req, res) => {
 }
 
+app.get('/api/pages', getAllPages)
+app.get('/api/pages/:pageId', getPage)
+app.get('/api/pages/:pageId/blocks', getAllBlocks)
+
+/******************** Back-office APIs ********************/
+// middleware for the APIs below
+app.use(isLoggedIn);  
+
+// Create a new Page 
 const createPage = async (req, res) => {
+    // check for validation error
+    const errors = validationResult(req).formatWith(errorFormatter);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ error: errors.array().join(", ") });
+    }
+    
+    let haveHeaderBlock = false;
+    let haveParagraphOrImage = false;
+    const blocks = req.body.blocks;
+    blocks.forEach( b => {
+        if(b.type === 'Header'){
+            haveHeaderBlock = true;
+        }
+        if(b.type === 'Paragraph' || b.type === 'Image'){
+            haveParagraphOrImage = true;
+        }
+    });
+
+    // Check if there is at leat one Header block and one block of other type
+    if( !haveHeaderBlock || !haveParagraphOrImage ){
+        return res.status(422).json({ 
+            error: "Page must have at least one block of type \"Header\" and one other block of type \"Paragraph\" or \"Image\""
+        });
+    }
+
+    const page = new Page(
+        null, 
+        req.body.title,
+        req.user.username,
+        dayjs(), //get current date
+        req.body.publication_date,
+    )
+
+    try {
+        // Create new Page
+        const data = await pagesDao.createPage(page);
+        
+        let newBlock;
+        let blockIds = [];
+
+        blocks.forEach( b => {
+            newBlock = new Block(
+                null,
+                b.type,
+                b.content,
+                data.id,
+            );
+            pagesDao.createBlock(newBlock).then((blockId) =>{
+                console.log(blockId);
+                blockIds.push({ id: blockId });
+            }).catch((err) => {
+                // TODO do i have to revert the work done to this point? 
+                res.status(503).json({ error: `Database error during the creation of new Block: ${err}` });
+            });
+        });
+        // returns created page and an array of block ids 
+        res.status(200).json({page: data, blockIds: blockIds});
+    } catch (err) {
+        res.status(503).json({ error: `Database error during the creation of new Page: ${err}` }); 
+    }
 }
 
 const editPage = async (req, res) => {
 }
 
 const deletePage = async (req, res) => {
-}
-
-const getAllBlocks = async (req, res) => {
 }
 
 const getBlock = async (req, res) => {
@@ -135,16 +222,32 @@ const editBlock = async (req, res) => {
 const deleteBlock = async (req, res) => {
 }
 
-app.get('/api/pages', getAllPages)
-app.get('/api/pages/:id', getPage)
-app.post('/api/pages', createPage)
-app.put('/api/pages/:id', editPage)
-app.delete('/api/pages/:id/', deletePage)
-app.get('/api/pages/:id/blocks', getAllBlocks)
-app.get('/api/pages/:id/blocks/:id', getBlock)
-app.post('/api/pages/:id/blocks', createBlock)
-app.put('/api/pages/:id/blocks/:id', editBlock)
-app.delete('/api/pages/:id/blocks/:id', deleteBlock)
+
+app.post('/api/pages', [
+        check('title').isLength({min: 1, max:160}),
+        // date in the YYYY-MM-DD format
+        check('publication_date').isLength({min: 10, max: 10}).isISO8601({strict: true}).optional({checkFalsy: true}),
+        check('blocks').custom((b) => {
+            if (Array.isArray(b) && b.length >= 2) {
+                b.forEach((b) => {
+                    if(!b.type || b.type.trim().length === 0){
+                        throw new Error('blocks: invalid type');
+                    }
+                    if(!b.content || b.content.trim().length === 0){
+                        throw new Error('blocks: invalid content');
+                    }
+                })
+                return true;
+            }
+            throw new Error('blocks must be at least two');
+        }),
+    ], createPage)
+app.put('/api/pages/:pageId', editPage)
+app.delete('/api/pages/:pageId/', deletePage)
+app.get('/api/pages/:pageId/blocks/:blockId', getBlock)
+app.post('/api/pages/:pageId/blocks', createBlock)
+app.put('/api/pages/:pageId/blocks/:blockId', editBlock)
+app.delete('/api/pages/:pageId/blocks/:blockId', deleteBlock)
 
 app.listen(PORT,
     () => { console.log(`Server started on http://localhost:${PORT}/`) });

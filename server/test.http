@@ -1,23 +1,41 @@
-GET http://localhost:3000/api/pages
-###
-
+######################### AUTHENTICATION #########################
 // Login
 POST http://localhost:3000/api/login HTTP/1.1
 content-type: application/json
 
 {
-    "username": "user2",
-    "password": "isSecret"
+    "username": "user1",
+    "password": "guess_my_password"
 }
-
 ###
 
 // Verify if user is still authenticated
 GET http://localhost:3000/api/verifyAuth HTTP/1.1
-
 ###
 
 // Logout
 DELETE http://localhost:3000/api/logout HTTP/1.1
-
 ###
+
+######################### FRONT OFFICE #########################
+// Get all Pages
+GET http://localhost:3000/api/pages
+###
+
+// Get all blocks of a Page
+GET http://localhost:3000/api/pages/5/blocks
+###
+
+######################### BACK OFFICE #########################
+// Create new Page
+POST http://localhost:3000/api/pages HTTP/1.1
+content-type: application/json
+
+{
+    "title": "CMSmall with blocks",
+    "publication_date": "2023-08-01",
+    "blocks": [{ "type": "Header", "content": "CMSmall Header block"}, { "type": "Paragraph", "content": "CMSmall Paragraph block"}, { "type": "Paragraph", "content": "Second Paragraph block"}]
+}
+###
+
+
