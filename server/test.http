@@ -23,7 +23,7 @@ GET http://localhost:3000/api/pages
 ###
 
 // Get all blocks of a Page
-GET http://localhost:3000/api/pages/5/blocks
+GET http://localhost:3000/api/pages/9/blocks
 ###
 
 ######################### BACK OFFICE #########################
@@ -38,4 +38,9 @@ content-type: application/json
 }
 ###
 
+// Delete Page
+DELETE  http://localhost:3000/api/pages/8 HTTP/1.1
+content-type: application/json
+
+###
 

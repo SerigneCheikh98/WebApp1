@@ -208,6 +208,31 @@ const editPage = async (req, res) => {
 }
 
 const deletePage = async (req, res) => {
+    // check for validation error
+    const errors = validationResult(req).formatWith(errorFormatter);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ error: errors.array().join(", ") });
+    }
+    
+    const pageId = req.params.pageId;
+    try {
+        // Check if the user calling is the page's Author 
+        const page = await pagesDao.getPage(pageId);
+        if(page.error){
+            return res.status(404).json(page);
+        }
+        if (page.author !== req.user.username) {
+            return res.status(401).json({ error: "Unauthorized: can not delete page" });
+        }
+        //delete page
+        const result = await pagesDao.deletePage(pageId);
+        if (result == null)
+            return res.status(200).json({message: "Success"});
+        else
+            return res.status(404).json(result);
+    } catch (err) {
+        res.status(503).json({ error: `Database error during the deletion of film ${req.params.id}: ${err} ` });
+    }
 }
 
 const getBlock = async (req, res) => {
@@ -243,7 +268,7 @@ app.post('/api/pages', [
         }),
     ], createPage)
 app.put('/api/pages/:pageId', editPage)
-app.delete('/api/pages/:pageId/', deletePage)
+app.delete('/api/pages/:pageId', [ check('pageId').isInt() ], deletePage)
 app.get('/api/pages/:pageId/blocks/:blockId', getBlock)
 app.post('/api/pages/:pageId/blocks', createBlock)
 app.put('/api/pages/:pageId/blocks/:blockId', editBlock)

@@ -29,6 +29,9 @@ exports.getPage = (pageId) => {
           if (err) {
             reject(err);
           }
+          if (row == undefined) {
+            resolve({ error: 'Page not found!' });
+          }
           else {
             resolve(new Page(row.id, row.title, row.author, row.date, row.publication_date));
           }
@@ -67,28 +70,31 @@ exports.updatePage = (pageId, page) => {
 };
 
 exports.deletePage = (pageId) => {
-    //Delete all blocks first then delete the page
-    return new Promise((resolve, reject) => {
-        const sqlBlocks = 'DELETE FROM Blocks WHERE idPage=?';
+  //Delete all blocks first then delete the page
+  return new Promise((resolve, reject) => {
+    const sqlBlocks = 'DELETE FROM Blocks WHERE idPage=?';
 
-        db.run(sqlBlocks, [pageId], (err) => {
+    db.run(sqlBlocks, [pageId], (err) => {
+      if (err) {
+        reject(err);
+      }
+      else {
+        const sqlPages = 'DELETE FROM Pages WHERE id=?';
+
+        db.run(sqlPages, [pageId], (err) => {
           if (err) {
             reject(err);
           }
-          else {
-            const sqlPages = 'DELETE FROM Pages WHERE id=?';
-            
-            db.run(sqlPages, [pageId], (err) => {
-              if (err) {
-                reject(err);
-              }
-              else {
-                resolve(true);
-              }
-            });
+          if (this.changes < 1) { 
+            resolve({ error: 'Page not found!' }); 
+          }
+          else{
+            resolve(null);
           }
         });
+      }
     });
+  });
 };
 
 /******************** Blocks ********************/
