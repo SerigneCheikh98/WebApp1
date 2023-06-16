@@ -23,7 +23,7 @@ GET http://localhost:3000/api/pages
 ###
 
 // Get all blocks of a Page
-GET http://localhost:3000/api/pages/9/blocks
+GET http://localhost:3000/api/pages/12/blocks
 ###
 
 ######################### BACK OFFICE #########################
@@ -39,8 +39,20 @@ content-type: application/json
 ###
 
 // Delete Page
-DELETE  http://localhost:3000/api/pages/8 HTTP/1.1
+DELETE  http://localhost:3000/api/pages/3 HTTP/1.1
 content-type: application/json
 
 ###
 
+// Edit Page
+PUT http://localhost:3000/api/pages/12 HTTP/1.1
+content-type: application/json
+
+{
+    "title": "Edited page with extra block",
+    "publication_date": "2023-06-16",
+    "updateBlocks": [{ "id": "24", "content": "CMSmall Header block EDITED" }],
+    "deleteBlocks": [{ "id": "26" }],
+    "addBlocks": [{ "type": "Image", "content": "/path/to/image"}]
+}
+###

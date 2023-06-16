@@ -61,6 +61,23 @@ const isLoggedIn = (req, res, next) => {
     return res.status(401).json({ error: 'Not authorized' });
 }
 
+// Authorship checker middleware
+const isAuthor = async (req, res, next) => {
+    const pageId = req.params.pageId;
+    try {
+        const page = await pagesDao.getPage(pageId);
+        if (page.error) {
+            return res.status(404).json(page);
+        }
+        if (page.author !== req.user.username) {
+            return res.status(401).json({ error: "Unauthorized: Author mismatch" });
+        }
+        return next();
+    } catch (err) {
+        res.status(503).json({ error: `Database error ${req.params.id}: ${err} ` });
+    }
+}
+
 // This function is used to format express-validator errors as strings
 const errorFormatter = ({ location, msg, param, value, nestedErrors }) => {
     return `${location}[${param}]: ${msg}`;
@@ -204,7 +221,24 @@ const createPage = async (req, res) => {
     }
 }
 
+// Edit a page which user is author
 const editPage = async (req, res) => {
+    // check for validation error
+    const errors = validationResult(req).formatWith(errorFormatter);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ error: errors.array().join(", ") });
+    }
+
+    const pageId = req.params.pageId;
+    try {
+        const page = new Page(pageId, req.body.title, req.user.username, null, req.body.publication_date);
+        //delete page
+        await pagesDao.updatePage(pageId, page, req.body.updateBlocks, req.body.deleteBlocks, req.body.addBlocks);
+        
+        res.status(200).json({message: "Success"});
+    } catch (err) {
+        res.status(503).json({ error: `Database error during edit of page${req.params.id}: ${err} ` });
+    }
 }
 
 const deletePage = async (req, res) => {
@@ -216,14 +250,6 @@ const deletePage = async (req, res) => {
     
     const pageId = req.params.pageId;
     try {
-        // Check if the user calling is the page's Author 
-        const page = await pagesDao.getPage(pageId);
-        if(page.error){
-            return res.status(404).json(page);
-        }
-        if (page.author !== req.user.username) {
-            return res.status(401).json({ error: "Unauthorized: can not delete page" });
-        }
         //delete page
         const result = await pagesDao.deletePage(pageId);
         if (result == null)
@@ -231,7 +257,7 @@ const deletePage = async (req, res) => {
         else
             return res.status(404).json(result);
     } catch (err) {
-        res.status(503).json({ error: `Database error during the deletion of film ${req.params.id}: ${err} ` });
+        res.status(503).json({ error: `Database error during the deletion of page ${req.params.id}: ${err} ` });
     }
 }
 
@@ -249,26 +275,76 @@ const deleteBlock = async (req, res) => {
 
 
 app.post('/api/pages', [
-        check('title').isLength({min: 1, max:160}),
-        // date in the YYYY-MM-DD format
-        check('publication_date').isLength({min: 10, max: 10}).isISO8601({strict: true}).optional({checkFalsy: true}),
-        check('blocks').custom((b) => {
-            if (Array.isArray(b) && b.length >= 2) {
-                b.forEach((b) => {
-                    if(!b.type || b.type.trim().length === 0){
-                        throw new Error('blocks: invalid type');
-                    }
-                    if(!b.content || b.content.trim().length === 0){
-                        throw new Error('blocks: invalid content');
-                    }
-                })
-                return true;
-            }
-            throw new Error('blocks must be at least two');
-        }),
-    ], createPage)
-app.put('/api/pages/:pageId', editPage)
-app.delete('/api/pages/:pageId', [ check('pageId').isInt() ], deletePage)
+    check('title').isLength({ min: 1, max: 160 }),
+    // date in the YYYY-MM-DD format
+    check('publication_date').isLength({ min: 10, max: 10 }).isISO8601({ strict: true }).optional({ checkFalsy: true }),
+    check('blocks').custom((b) => {
+        if (Array.isArray(b) && b.length >= 2) {
+            b.forEach((b) => {
+                if (!b.type || b.type.trim().length === 0) {
+                    throw new Error('blocks: invalid type');
+                }
+                if (b.type !== 'Header' && b.type !== 'Paragraph' && b.type !== 'Image') {
+                    throw new Error('blocks: invalid type value');
+                }
+                if (!b.content || b.content.trim().length === 0) {
+                    throw new Error('blocks: invalid content');
+                }
+            })
+            return true;
+        }
+        throw new Error('blocks must be at least two');
+    }),
+], createPage);
+app.put('/api/pages/:pageId',isAuthor, [
+    check('title').isLength({min: 1, max:160}),
+    // date in the YYYY-MM-DD format
+    check('publication_date').isLength({min: 10, max: 10}).isISO8601({strict: true}).optional({checkFalsy: true}),
+    check('updateBlocks').custom((b) => {
+        // cannot change block type
+        if (Array.isArray(b)) {
+            b.forEach((b) => {
+                if(!b.id || isNaN(Number(b.id))){
+                    throw new Error('updateBlocks: invalid id');
+                }
+                if(!b.content || b.content.trim().length === 0){
+                    throw new Error('updateBlocks: invalid content');
+                }
+            })
+            return true;
+        }
+        throw new Error('Invalid updateBlocks');
+    }),
+    check('deleteBlocks').custom((b) => {
+        if (Array.isArray(b)) {
+            b.forEach((b) => {
+                if(!b.id || isNaN(Number(b.id))){
+                    throw new Error('deleteBlocks: invalid id');
+                }
+            })
+            return true;
+        }
+        throw new Error('Invalid deleteBlocks');
+    }),
+    check('addBlocks').custom((b) => {
+        if (Array.isArray(b)) {
+            b.forEach((b) => {
+                if(!b.type || !b.type.trim().length === 0){
+                    throw new Error('addBlocks: invalid type');
+                }
+                if(b.type !== 'Header' && b.type !== 'Paragraph' && b.type !== 'Image'){
+                    throw new Error('addBlocks: invalid type value');
+                }
+                if(!b.content || b.content.trim().length === 0){
+                    throw new Error('addBlocks: invalid content');
+                }
+            })
+            return true;
+        }
+        throw new Error('Invalid addBlocks');
+    }),
+], editPage);
+app.delete('/api/pages/:pageId', isAuthor, [ check('pageId').isInt() ], deletePage)
 app.get('/api/pages/:pageId/blocks/:blockId', getBlock)
 app.post('/api/pages/:pageId/blocks', createBlock)
 app.put('/api/pages/:pageId/blocks/:blockId', editBlock)

@@ -53,7 +53,7 @@ exports.createPage = (newPage) => {
     });
 };
 
-exports.updatePage = (pageId, page) => {
+exports.updatePage = (pageId, page, updateBlocks, deleteBlocks, addBlocks) => {
     return new Promise((resolve, reject) => {
         // can not update `date` and `author` fields
         const sql = `UPDATE Pages SET title=?, publication_date=? WHERE id=?` ;
@@ -63,7 +63,35 @@ exports.updatePage = (pageId, page) => {
             reject(err);
           }
           else {
-            resolve(true);
+            //update blocks
+            const updateBlock = `UPDATE Blocks SET content=? WHERE id=? AND idPage=?`;
+            updateBlocks.forEach(b => {
+              db.run(updateBlock, [b.content, b.id, pageId], (err) => {
+                if (err) {
+                  reject(err)
+                }
+              });
+            });
+            //delete blocks
+            const deleteBlock = `DELETE FROM Blocks WHERE id=? AND idPage=?`;
+            deleteBlocks.forEach(b => {
+              db.run(deleteBlock, [b.id, pageId], (err) => {
+                if (err) {
+                  reject(err)
+                }
+              });
+            });
+            // add new blocks
+            const addBlock = 'INSERT INTO Blocks(type, content, idPage) VALUES(?,?,?)';
+            addBlocks.forEach(b => {
+              db.run(addBlock, [b.type, b.content, pageId], (err) => {
+                if (err) {
+                  reject(err);
+                }
+              });
+            });
+
+            resolve(null);
           }
         });
     });
