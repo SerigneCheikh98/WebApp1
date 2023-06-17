@@ -26,6 +26,10 @@ GET http://localhost:3000/api/pages
 GET http://localhost:3000/api/pages/12/blocks
 ###
 
+// Get a Page with block
+GET http://localhost:3000/api/pages/12
+###
+
 ######################### BACK OFFICE #########################
 // Create new Page
 POST http://localhost:3000/api/pages HTTP/1.1

@@ -146,11 +146,27 @@ const getAllBlocks = async (req, res) => {
     }
 }
 
+// returns a Page with all related blocks
 const getPage = async (req, res) => {
+    // check for validation error
+    const errors = validationResult(req).formatWith(errorFormatter);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ error: errors.array().join(", ") });
+    }
+    
+    const pageId = req.params.pageId;
+
+    try {
+        const pageWithBlocks = await pagesDao.getPage(pageId);
+
+        res.status(200).json(pageWithBlocks);
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
 }
 
 app.get('/api/pages', getAllPages)
-app.get('/api/pages/:pageId', getPage)
+app.get('/api/pages/:pageId', [ check('pageId').isInt() ], getPage)
 app.get('/api/pages/:pageId/blocks', getAllBlocks)
 
 /******************** Back-office APIs ********************/
@@ -241,6 +257,7 @@ const editPage = async (req, res) => {
     }
 }
 
+// Delete a page which user is author
 const deletePage = async (req, res) => {
     // check for validation error
     const errors = validationResult(req).formatWith(errorFormatter);

@@ -33,7 +33,17 @@ exports.getPage = (pageId) => {
             resolve({ error: 'Page not found!' });
           }
           else {
-            resolve(new Page(row.id, row.title, row.author, row.date, row.publication_date));
+            const sqlBlocks = 'SELECT * FROM Blocks WHERE idPage=?';
+            db.all(sqlBlocks, [pageId], (err, rows) => {
+              if (err) {
+                reject(err);
+              }
+              else {
+                const blocks = rows.map((block) => { return new Block(block.id, block.type, block.content, block.idPage) })
+                const page = new Page(row.id, row.title, row.author, row.date, row.publication_date); 
+                resolve({page: page, blocks: blocks});
+              }
+            });
           }
         });
     });
