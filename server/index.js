@@ -213,9 +213,8 @@ const createPage = async (req, res) => {
         const data = await pagesDao.createPage(page);
         
         let newBlock;
-        let blockIds = [];
 
-        blocks.forEach( b => {
+        /*blocks.forEach( b => {
             newBlock = new Block(
                 null,
                 b.type,
@@ -229,7 +228,21 @@ const createPage = async (req, res) => {
                 // TODO do i have to revert the work done to this point? 
                 res.status(503).json({ error: `Database error during the creation of new Block: ${err}` });
             });
-        });
+        });*/
+        const blockIds = await Promise.all(blocks.map(async (b) => {
+            newBlock = new Block(
+                null,
+                b.type,
+                b.content,
+                data.id,
+            );
+            try {
+                const blockId = await pagesDao.createBlock(newBlock);
+                return { id: blockId };
+            } catch (err) {
+                res.status(503).json({ error: `Database error during the creation of new Block: ${err}` });
+            };
+        }));
         // returns created page and an array of block ids 
         res.status(200).json({page: data, blockIds: blockIds});
     } catch (err) {
