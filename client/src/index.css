@@ -1,0 +1,7 @@
+.without-border {
+    border: none;
+}
+
+.custom-list-item {
+    padding: 0;
+}

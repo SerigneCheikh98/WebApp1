@@ -37,8 +37,8 @@ content-type: application/json
 
 {
     "title": "CMSmall with blocks",
-    "publication_date": "2023-08-01",
-    "blocks": [{ "type": "Header", "content": "CMSmall Header block"}, { "type": "Paragraph", "content": "CMSmall Paragraph block"}, { "type": "Paragraph", "content": "Second Paragraph block"}]
+    "publication_date": "2022-08-01",
+    "blocks": [{ "type": "Header", "content": "CMSmall Header block", "position": 1 }, { "type": "Paragraph", "content": "CMSmall Paragraph block", "position": 2}, { "type": "Paragraph", "content": "Second Paragraph block", "position": 3}]
 }
 ###
 

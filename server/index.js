@@ -25,7 +25,10 @@ const app = express();
 // Register middlewares
 app.use(morgan('combined'));
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: 'http://localhost:5173',
+    credentials: true,
+}));
 
 app.use(session({
     secret: "Deboli o forti, intelligenti o semplici, noi simo tutti fratelli...Good luck with this secret!",
@@ -37,7 +40,8 @@ app.use(session({
 passport.use(new LocalStrategy(async function verify(username, password, callback) {
   const user = await usersDao.getUser(username, password)
   if(!user){
-    return callback(null, false, 'Invalid username or password');  
+    const errMessage = {message: 'Invalid username or password'};
+    return callback(null, false, errMessage);  
   }
   return callback(null, user);
 }));
@@ -119,7 +123,7 @@ const verifyAuth = (req, res) => {
 
 app.post('/api/login', login);
 app.get('/api/verifyAuth', verifyAuth);
-app.delete('/api/logout', logout);
+app.post('/api/logout', logout);
 
 
 /******************** Front-office APIs ********************/
@@ -235,6 +239,7 @@ const createPage = async (req, res) => {
                 b.type,
                 b.content,
                 data.id,
+                b.position,
             );
             try {
                 const blockId = await pagesDao.createBlock(newBlock);

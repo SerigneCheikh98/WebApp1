@@ -39,7 +39,7 @@ exports.getPage = (pageId) => {
                 reject(err);
               }
               else {
-                const blocks = rows.map((block) => { return new Block(block.id, block.type, block.content, block.idPage) })
+                const blocks = rows.map((block) => { return new Block(block.id, block.type, block.content, block.idPage, block.position) })
                 const page = new Page(row.id, row.title, row.author, row.date, row.publication_date); 
                 resolve({page: page, blocks: blocks});
               }
@@ -74,9 +74,9 @@ exports.updatePage = (pageId, page, updateBlocks, deleteBlocks, addBlocks) => {
           }
           else {
             //update blocks
-            const updateBlock = `UPDATE Blocks SET content=? WHERE id=? AND idPage=?`;
+            const updateBlock = `UPDATE Blocks SET content=?, position=? WHERE id=? AND idPage=?`;
             updateBlocks.forEach(b => {
-              db.run(updateBlock, [b.content, b.id, pageId], (err) => {
+              db.run(updateBlock, [b.content, b.position, b.id, pageId], (err) => {
                 if (err) {
                   reject(err)
                 }
@@ -92,9 +92,9 @@ exports.updatePage = (pageId, page, updateBlocks, deleteBlocks, addBlocks) => {
               });
             });
             // add new blocks
-            const addBlock = 'INSERT INTO Blocks(type, content, idPage) VALUES(?,?,?)';
+            const addBlock = 'INSERT INTO Blocks(type, content, idPage, position) VALUES(?,?,?,?)';
             addBlocks.forEach(b => {
-              db.run(addBlock, [b.type, b.content, pageId], (err) => {
+              db.run(addBlock, [b.type, b.content, pageId, b.position], (err) => {
                 if (err) {
                   reject(err);
                 }
@@ -145,7 +145,7 @@ exports.getAllBlocksByPage = (pageId) => {
           reject(err);
         }
         else {
-          const blocks = rows.map((block) => { return new Block(block.id, block.type, block.content, block.idPage)})
+          const blocks = rows.map((block) => { return new Block(block.id, block.type, block.content, block.idPage, block.position)})
           resolve(blocks);
         }
       });
@@ -160,7 +160,7 @@ exports.getBlock = (blockId) => {
           reject(err);
         }
         else {
-          resolve(new Block(row.id, row.type, row.content, row.idPage));
+          resolve(new Block(row.id, row.type, row.content, row.idPage, row.position));
         }
       });
   });
@@ -168,8 +168,8 @@ exports.getBlock = (blockId) => {
 
 exports.createBlock = (newBlock) => {
   return new Promise((resolve, reject) => {
-      const sql = 'INSERT INTO Blocks(type, content, idPage) VALUES(?,?,?)';
-      db.run(sql, [newBlock.type, newBlock.content, newBlock.idPage], function (err) {
+      const sql = 'INSERT INTO Blocks(type, content, idPage, position) VALUES(?,?,?,?)';
+      db.run(sql, [newBlock.type, newBlock.content, newBlock.idPage, newBlock.position], function (err) {
         if (err) {
           reject(err);
         }
@@ -183,9 +183,9 @@ exports.createBlock = (newBlock) => {
 exports.updateBlock = (blockId, block) => {
   return new Promise((resolve, reject) => {
       // do not change the type of a block
-      const sql = `UPDATE Blocks SET content=? WHERE id=?`;
+      const sql = `UPDATE Blocks SET content=?, position=? WHERE id=?`;
 
-      db.run(sql, [block.content, blockId], (err) => {
+      db.run(sql, [block.content, block.position, blockId], (err) => {
         if (err) {
           reject(err);
         }
