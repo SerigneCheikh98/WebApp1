@@ -8,6 +8,7 @@ async function login(username, password) {
             headers: {
                 'Content-Type': 'application/json'
             },
+            credentials: 'include',
             body: JSON.stringify({
                 username: username,
                 password: password
@@ -44,6 +45,7 @@ async function logout() {
     try {
         const response = await fetch(APIURL + '/logout', {
             method: 'POST',
+            credentials: 'include',
         });
         if (response.ok) {
             const message = await response.json();

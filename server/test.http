@@ -30,6 +30,18 @@ GET http://localhost:3000/api/pages/12/blocks
 GET http://localhost:3000/api/pages/12
 ###
 
+//Get website's name
+GET http://localhost:3000/api/websiteName
+###
+
+// Set website name
+PUT http://localhost:3000/api/websiteName
+content-type: application/json
+
+{
+    "name": "Website CMS"
+}
+
 ######################### BACK OFFICE #########################
 // Create new Page
 POST http://localhost:3000/api/pages HTTP/1.1

@@ -10,6 +10,7 @@ const { check, validationResult, } = require('express-validator');
 // Get modules accessing the DB and Model
 const usersDao = require('./dao-users');
 const pagesDao = require('./dao-pages'); 
+const webNameDao = require('./dao-name');
 const {Page, Block} = require('./pb-constructors');
 
 // Middlewares
@@ -169,10 +170,24 @@ const getPage = async (req, res) => {
     }
 }
 
+// returns the name of the website
+const getName = async (req, res) => {
+    try {
+        const webName = await webNameDao.getName();
+        if(webName.error){
+            return res.status(404).json({ error: webName.error});
+        }
+        res.status(200).json(webName);
+    } catch (error) {
+        console.log(error)
+        res.status(500).send(error.message);
+    }
+}
+
 app.get('/api/pages', getAllPages)
 app.get('/api/pages/:pageId', [ check('pageId').isInt() ], getPage)
 app.get('/api/pages/:pageId/blocks', getAllBlocks)
-
+app.get('/api/websiteName', getName)
 /******************** Back-office APIs ********************/
 // middleware for the APIs below
 app.use(isLoggedIn);  
@@ -296,6 +311,21 @@ const deletePage = async (req, res) => {
     }
 }
 
+const updateName = async (req, res) => {
+    // check for validation error
+    const errors = validationResult(req).formatWith(errorFormatter);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ error: errors.array().join(", ") });
+    }
+
+    try {
+        await webNameDao.updateName(req.body.name);
+        res.status(200).json({message: "Success"});
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+}
+
 const getBlock = async (req, res) => {
 }
 
@@ -384,6 +414,7 @@ app.get('/api/pages/:pageId/blocks/:blockId', getBlock)
 app.post('/api/pages/:pageId/blocks', createBlock)
 app.put('/api/pages/:pageId/blocks/:blockId', editBlock)
 app.delete('/api/pages/:pageId/blocks/:blockId', deleteBlock)
+app.put('/api/websiteName', [ check('name').isLength({min: 1, max:160}) ], updateName)
 
 app.listen(PORT,
     () => { console.log(`Server started on http://localhost:${PORT}/`) });
