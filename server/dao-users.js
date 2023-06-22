@@ -32,7 +32,6 @@ exports.getUser = (username, password) => {
 };
 
 
-// This function returns user's information given its id.
 exports.getUserById = (id) => {
   return new Promise((resolve, reject) => {
     const sql = 'SELECT * FROM Users WHERE id=?';
@@ -42,8 +41,23 @@ exports.getUserById = (id) => {
       else if (row === undefined)
         resolve({ error: 'User not found.' });
       else {
-        // By default, the local strategy looks for "username": 
-        // for simplicity, instead of using "email", we create an object with that property.
+        const user = { id: row.id, username: row.username, role: row.role }
+        resolve(user);
+      }
+    });
+  });
+};
+
+
+exports.getUserByUsername = (username) => {
+  return new Promise((resolve, reject) => {
+    const sql = 'SELECT * FROM Users WHERE username=?';
+    db.get(sql, [username], (err, row) => {
+      if (err)
+        reject(err);
+      else if (row === undefined)
+        resolve({ error: 'User not found.' });
+      else {
         const user = { id: row.id, username: row.username, role: row.role }
         resolve(user);
       }

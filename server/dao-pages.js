@@ -47,6 +47,24 @@ exports.getPage = (pageId) => {
     });
 };
 
+exports.getPageInfo = (pageId) => {
+  return new Promise((resolve, reject) => {
+      const sql = 'SELECT * FROM Pages WHERE id=?';
+      db.get(sql, [pageId], (err, row) => {
+        if (err) {
+          reject(err);
+        }
+        if (row == undefined) {
+          resolve({ error: 'Page not found!' });
+        }
+        else {
+          const page = new Page(row.id, row.title, row.author, row.date, row.publication_date); 
+          resolve({page: page});
+        }
+      });
+  });
+};
+
 exports.createPage = (newPage) => {
     return new Promise((resolve, reject) => {
         const sql = 'INSERT INTO Pages(title, author, date, publication_date) VALUES(?,?,?,?)';
@@ -98,8 +116,7 @@ exports.updatePage = (pageId, page, updateBlocks, deleteBlocks, addBlocks) => {
                 }
               });
             });
-
-            resolve(null);
+            resolve({});
           }
         });
     });
@@ -125,7 +142,7 @@ exports.deletePage = (pageId) => {
             resolve({ error: 'Page not found!' }); 
           }
           else{
-            resolve(null);
+            resolve({});
           }
         });
       }
@@ -133,6 +150,20 @@ exports.deletePage = (pageId) => {
   });
 };
 
+exports.updateAuthor = (pageId, author) => {
+  return new Promise((resolve, reject) => {
+    const sql = `UPDATE Pages SET author=? WHERE id=?`;
+
+    db.run(sql, [author, pageId], (err) => {
+      if (err) {
+        reject(err);
+      }
+      else {
+        resolve({});
+      }
+    });
+  });
+}
 /******************** Blocks ********************/
 
 exports.getAllBlocksByPage = (pageId) => {

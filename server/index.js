@@ -74,8 +74,27 @@ const isAuthor = async (req, res, next) => {
         if (page.error) {
             return res.status(404).json(page);
         }
-        if (page.author !== req.user.username) {
+        if (page.author !== req.user.username && req.user.role !== 'admin') {
             return res.status(401).json({ error: "Unauthorized: Author mismatch" });
+        }
+        return next();
+    } catch (err) {
+        res.status(503).json({ error: `Database error ${req.params.id}: ${err} ` });
+    }
+}
+
+// Admin role checker middleware
+const isAdmin = async (req, res, next) => {
+    try {
+        const user = await usersDao.getUserById(req.user.id);
+        if (user.error) {
+            return res.status(404).json(user);
+        }
+        if (user.username !== req.user.username) {
+            return res.status(401).json({ error: "Unauthorized!" });
+        }
+        if(user.role !== 'admin'){
+            return res.status(401).json({ error: "Unauthorized: only Admin!" });
         }
         return next();
     } catch (err) {
@@ -325,6 +344,34 @@ const updateName = async (req, res) => {
         res.status(500).send(error.message);
     }
 }
+const updateAuthor = async (req, res) => {
+    // check for validation error
+    const errors = validationResult(req).formatWith(errorFormatter);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ error: errors.array().join(", ") });
+    }
+    const author = req.body.author;
+    const pageId = req.params.pageId;
+    try {
+        //check if author exist
+        const user = await usersDao.getUserByUsername(author);
+        if(user.error){
+            return res.status(404).json({error: user.error});
+        }
+
+        //chek if page exist
+        const page = await pagesDao.getPageInfo(pageId)
+        if(page.error){
+            return res.status(404).json({error: page.error});
+        }
+
+        await pagesDao.updateAuthor(pageId, author);
+        res.status(200).json({message: "Success"});
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+
+}
 
 const getBlock = async (req, res) => {
 }
@@ -414,7 +461,8 @@ app.get('/api/pages/:pageId/blocks/:blockId', getBlock)
 app.post('/api/pages/:pageId/blocks', createBlock)
 app.put('/api/pages/:pageId/blocks/:blockId', editBlock)
 app.delete('/api/pages/:pageId/blocks/:blockId', deleteBlock)
-app.put('/api/websiteName', [ check('name').isLength({min: 1, max:160}) ], updateName)
+app.put('/api/websiteName', isAdmin, [ check('name').isLength({min: 1, max:160}) ], updateName)
+app.put('/api/pages/:pageId/admin', isAdmin, [ check('author').isLength({min: 1, max:160}) ], updateAuthor)
 
 app.listen(PORT,
     () => { console.log(`Server started on http://localhost:${PORT}/`) });

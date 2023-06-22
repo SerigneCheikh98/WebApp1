@@ -4,9 +4,14 @@ POST http://localhost:3000/api/login HTTP/1.1
 content-type: application/json
 
 {
-    "username": "user1",
-    "password": "guess_my_password"
+    "username": "admin@cms.com",
+    "password": "secureAdmin"
 }
+
+# {
+#     "username": "user1",
+#     "password": "guess_my_password"
+# }
 ###
 
 // Verify if user is still authenticated
@@ -33,14 +38,6 @@ GET http://localhost:3000/api/pages/12
 //Get website's name
 GET http://localhost:3000/api/websiteName
 ###
-
-// Set website name
-PUT http://localhost:3000/api/websiteName
-content-type: application/json
-
-{
-    "name": "Website CMS"
-}
 
 ######################### BACK OFFICE #########################
 // Create new Page
@@ -70,5 +67,23 @@ content-type: application/json
     "updateBlocks": [{ "id": "24", "content": "CMSmall Header block EDITED" }],
     "deleteBlocks": [{ "id": "26" }],
     "addBlocks": [{ "type": "Image", "content": "/path/to/image"}]
+}
+###
+
+// Set website name
+PUT http://localhost:3000/api/websiteName
+content-type: application/json
+
+{
+    "name": "Website CMS"
+}
+###
+
+// Set Author
+PUT http://localhost:3000/api/pages/13/admin
+Content-Type: application/json
+
+{
+    "author": "user2"
 }
 ###
