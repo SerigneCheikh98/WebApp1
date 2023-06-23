@@ -76,4 +76,19 @@ async function getPageWithBlocks(pageId) {
     }
 }
 
-export { getPages, login, getPageWithBlocks, logout};
+async function getWebsiteName() {
+    try {
+        const response = await fetch(APIURL + '/websiteName');
+        if (response.ok) {
+            const name = await response.json();
+            return name;
+        } else {
+            const error = await response.json();
+            throw new Error(response.statusText + " " + error);
+        }
+    } catch (error) {
+        throw new Error(error.message, { cause: error })
+    }
+}
+
+export { getPages, login, getPageWithBlocks, logout, getWebsiteName};

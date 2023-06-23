@@ -17,7 +17,7 @@ function PagesList(props) {
                     <Card.Body>
                         <Card.Title>{page.title}</Card.Title>
                         <Card.Subtitle>{page.author}</Card.Subtitle>
-                        <Card.Text><br></br>Created at {page.date} </Card.Text>
+                        <Card.Text><br></br>Published at {page.publication_date} </Card.Text>
                     </Card.Body>
                     <Card.Footer><Link to={`/pages/${page.id}`}>more details...</Link></Card.Footer>
                 </Card>
