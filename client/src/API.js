@@ -109,4 +109,29 @@ async function deletePage(pageId){
     }
 }
 
-export { getPages, login, getPageWithBlocks, logout, getWebsiteName, deletePage};
+async function updateWebsiteName(newName) {
+    try {
+        const response = await fetch(APIURL + '/websiteName', {
+            method: 'PUT',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                name: newName
+            })
+        });
+
+        if (response.ok) {
+            return {};
+        } else {
+            const error = await response.json();
+            throw new Error(response.statusText + " " + error);
+        }
+    } catch (error) {
+        throw new Error(error.message, { cause: error })
+    }
+}
+
+
+export { getPages, login, getPageWithBlocks, logout, getWebsiteName, deletePage, updateWebsiteName};

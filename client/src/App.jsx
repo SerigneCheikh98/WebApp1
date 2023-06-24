@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import { useState, useContext, useEffect } from 'react';
 import { BrowserRouter, Link, Outlet, Route, Routes } from 'react-router-dom';
 import { Container, Navbar } from 'react-bootstrap';
@@ -5,7 +6,7 @@ import { LoginForm } from './Auth';
 import { PageNotFound } from './PageNotFound';
 import { PagesList, PagesListBackOffice } from './PagesList';
 import { PageWithBlocks } from './Blocks';
-import { login, getPages, logout, getWebsiteName, deletePage } from './API';
+import { login, getPages, logout, getWebsiteName, deletePage, updateWebsiteName } from './API';
 import UserContext from './context';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -54,6 +55,11 @@ function App() {
     setPages(pages);
   }
 
+  const handleNameSubmit = async (webName) => {
+    await updateWebsiteName(webName);
+    setWebName(webName);
+}
+
   return <UserContext.Provider value={user}>
     <BrowserRouter>
       <Routes>
@@ -61,7 +67,7 @@ function App() {
           <Route index element={<PagesList pages={pages} idUser={user.id}/>} />
           <Route path='/login' element={ <LoginForm doLogin={doLogin}/> }/>
           <Route path='/pages/:pageId' element={<PageWithBlocks />} />
-          <Route path='/backOffice/pages' element={<PagesListBackOffice  pages={pages} handleDeletePage={handleDeletePage} userUsername={user.username}/>} />
+          <Route path='/backOffice/pages' element={<PagesListBackOffice  pages={pages} handleDeletePage={handleDeletePage} userUsername={user.username} role={user.role}  handleNameSubmit={handleNameSubmit}/>} />
           <Route path='*' element={<PageNotFound />} />
         </Route>
       </Routes>

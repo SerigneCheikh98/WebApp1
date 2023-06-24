@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import { Link, useNavigate } from 'react-router-dom';
-import { Card, Row, Col, Button, Stack } from 'react-bootstrap';
+import { Card, Row, Col, Button, Stack, Form } from 'react-bootstrap';
+import { useState } from 'react';
 import dayjs from 'dayjs';
 
 function PagesList(props) {
@@ -42,7 +43,7 @@ function PagesList(props) {
 
 function PagesListBackOffice (props) {
     const pages = props.pages;
-
+    const [webName, setWebName] = useState('');
     const navigate = useNavigate();
 
     // order pages by author
@@ -79,6 +80,18 @@ function PagesListBackOffice (props) {
                         </Card>
                     </Col>
                 ))}
+            <Col >
+            {
+                props.role === 'admin' && (
+                <Form>
+                <Form.Group className="mb-3">
+                    <Form.Label>Website Name</Form.Label>
+                    <Form.Control type='text' placeholder='Website name' value={webName} onChange={(event) => setWebName(event.target.value)} />
+                </Form.Group>
+                <Button variant="primary" type="button"  onClick={() => {props.handleNameSubmit(webName)}}>Update Website Name</Button>
+                </Form>)
+            }
+            </Col>
             <Col md={6} >
             <Stack direction="horizontal" gap={1}  >
                 <Button variant="success" type="button" onClick={() => { navigate('/pages/createPage') }}>Create Page</Button>
