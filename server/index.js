@@ -70,11 +70,11 @@ const isLoggedIn = (req, res, next) => {
 const isAuthor = async (req, res, next) => {
     const pageId = req.params.pageId;
     try {
-        const page = await pagesDao.getPage(pageId);
-        if (page.error) {
+        const p = await pagesDao.getPage(pageId);
+        if (p.error) {
             return res.status(404).json(page);
         }
-        if (page.author !== req.user.username && req.user.role !== 'admin') {
+        if (p.page.author !== req.user.username && req.user.role !== 'admin') {
             return res.status(401).json({ error: "Unauthorized: Author mismatch" });
         }
         return next();
@@ -321,7 +321,7 @@ const deletePage = async (req, res) => {
     try {
         //delete page
         const result = await pagesDao.deletePage(pageId);
-        if (result == null)
+        if (result === null)
             return res.status(200).json({message: "Success"});
         else
             return res.status(404).json(result);

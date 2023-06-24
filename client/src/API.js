@@ -91,4 +91,22 @@ async function getWebsiteName() {
     }
 }
 
-export { getPages, login, getPageWithBlocks, logout, getWebsiteName};
+async function deletePage(pageId){
+    try {
+        const response = await fetch(APIURL + `/pages/${pageId}`, {
+            method: 'DELETE',
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            return {};
+        } else {
+            const message = await response.text();
+            throw new Error(response.statusText + " " + message);
+        }
+    } catch (error) {
+        throw new Error(error.message, { cause: error })
+    }
+}
+
+export { getPages, login, getPageWithBlocks, logout, getWebsiteName, deletePage};

@@ -138,12 +138,12 @@ exports.deletePage = (pageId) => {
           if (err) {
             reject(err);
           }
-          if (this.changes < 1) { 
-            resolve({ error: 'Page not found!' }); 
-          }
-          else{
-            resolve({});
-          }
+          // if (this.changes < 1) { 
+          //   resolve({ error: 'Page not found!' }); 
+          // }
+          // else{
+             resolve(null);
+          // }
         });
       }
     });

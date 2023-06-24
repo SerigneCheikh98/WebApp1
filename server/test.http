@@ -45,9 +45,9 @@ POST http://localhost:3000/api/pages HTTP/1.1
 content-type: application/json
 
 {
-    "title": "CMSmall with blocks",
-    "publication_date": "2022-08-01",
-    "blocks": [{ "type": "Header", "content": "CMSmall Header block", "position": 1 }, { "type": "Paragraph", "content": "CMSmall Paragraph block", "position": 2}, { "type": "Paragraph", "content": "Second Paragraph block", "position": 3}]
+    "title": "Draft page title",
+    "publication_date": "",
+    "blocks": [{ "type": "Header", "content": "Header block", "position": 1 }, { "type": "Image", "content": "/windows-11.jpg", "position": 2}]
 }
 ###
 
