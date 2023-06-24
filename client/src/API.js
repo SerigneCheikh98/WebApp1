@@ -129,9 +129,33 @@ async function updateWebsiteName(newName) {
             throw new Error(response.statusText + " " + error);
         }
     } catch (error) {
-        throw new Error(error.message, { cause: error })
+        throw new Error(error.message, { cause: error });
+    }
+}
+
+async function createPage(page){
+    try{
+        const response = await fetch(APIURL + '/pages', {
+            method: 'POST',
+            credentials: 'include',
+            headers:{
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(page)
+        });
+        if(response.ok){
+            const page = await response.json();
+            console.log(page);
+            return page;
+        }
+        else{
+            const error = await response.json();
+            throw new Error(response.statusText + " " + error);
+        }
+    }catch(error){
+        throw new Error(error.message, { cause: error });
     }
 }
 
 
-export { getPages, login, getPageWithBlocks, logout, getWebsiteName, deletePage, updateWebsiteName};
+export { getPages, login, getPageWithBlocks, logout, getWebsiteName, deletePage, updateWebsiteName, createPage};

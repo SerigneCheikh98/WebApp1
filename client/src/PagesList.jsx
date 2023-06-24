@@ -73,7 +73,7 @@ function PagesListBackOffice (props) {
                                 <Card.Text> Status: {getStatus(page.publication_date)} </Card.Text>
                             </Card.Body>
                             <Card.Footer>
-                                <Button variant="danger" type="button" style={{ display: props.userUsername === page.author ? 'block' : 'none' }} 
+                                <Button variant="danger" type="button" style={{ display: (props.userUsername === page.author || props.role === 'admin') ? 'block' : 'none' }} 
                                     onClick={() => { props.handleDeletePage(page.id) }}>Delete Page</Button><br />
                                 <Link to={`/pages/${page.id}`}>more details...</Link>
                             </Card.Footer>
@@ -88,13 +88,13 @@ function PagesListBackOffice (props) {
                     <Form.Label>Website Name</Form.Label>
                     <Form.Control type='text' placeholder='Website name' value={webName} onChange={(event) => setWebName(event.target.value)} />
                 </Form.Group>
-                <Button variant="primary" type="button"  onClick={() => {props.handleNameSubmit(webName)}}>Update Website Name</Button>
+                <Button variant="primary" type="button" disabled={webName===''?true:false}  onClick={() => {props.handleNameSubmit(webName)}}>Update Website Name</Button>
                 </Form>)
             }
             </Col>
             <Col md={6} >
             <Stack direction="horizontal" gap={1}  >
-                <Button variant="success" type="button" onClick={() => { navigate('/pages/createPage') }}>Create Page</Button>
+                <Button variant="success" type="button" onClick={() => { navigate('/backOffice/pages/add') }}>Create Page</Button>
                 <Button variant="secondary" type="button" onClick={() => { navigate('/') }}>Go to Front-Office</Button>
             </Stack>
             </Col>

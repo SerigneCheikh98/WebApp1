@@ -402,6 +402,9 @@ app.post('/api/pages', [
                 if (!b.content || b.content.trim().length === 0) {
                     throw new Error('blocks: invalid content');
                 }
+                if(isNaN(Number(b.position))){
+                    throw new Error('blocks: invalid position');
+                }
             })
             return true;
         }

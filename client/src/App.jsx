@@ -6,6 +6,7 @@ import { LoginForm } from './Auth';
 import { PageNotFound } from './PageNotFound';
 import { PagesList, PagesListBackOffice } from './PagesList';
 import { PageWithBlocks } from './Blocks';
+import { AddPageBackOffice } from './AddPage';
 import { login, getPages, logout, getWebsiteName, deletePage, updateWebsiteName } from './API';
 import UserContext from './context';
 
@@ -58,7 +59,7 @@ function App() {
   const handleNameSubmit = async (webName) => {
     await updateWebsiteName(webName);
     setWebName(webName);
-}
+  }
 
   return <UserContext.Provider value={user}>
     <BrowserRouter>
@@ -68,6 +69,7 @@ function App() {
           <Route path='/login' element={ <LoginForm doLogin={doLogin}/> }/>
           <Route path='/pages/:pageId' element={<PageWithBlocks />} />
           <Route path='/backOffice/pages' element={<PagesListBackOffice  pages={pages} handleDeletePage={handleDeletePage} userUsername={user.username} role={user.role}  handleNameSubmit={handleNameSubmit}/>} />
+          <Route path='/backOffice/pages/add' element={<AddPageBackOffice setPages={setPages}/>} />
           <Route path='*' element={<PageNotFound />} />
         </Route>
       </Routes>
