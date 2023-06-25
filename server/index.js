@@ -373,6 +373,24 @@ const updateAuthor = async (req, res) => {
 
 }
 
+const findUser = async (req, res)  => {
+    // check for validation error
+    const errors = validationResult(req).formatWith(errorFormatter);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ error: errors.array().join(", ") });
+    }
+    const username = req.params.username;
+    try {
+        const user = await usersDao.getUserByUsername(username);
+        if (user.error) {
+            return res.status(404).json({ error: user.error });
+        }
+        res.status(200).json({ user});
+    } catch (error) {
+        res.status(500).send(error.message);
+    }
+}
+
 const getBlock = async (req, res) => {
 }
 
@@ -465,7 +483,8 @@ app.post('/api/pages/:pageId/blocks', createBlock)
 app.put('/api/pages/:pageId/blocks/:blockId', editBlock)
 app.delete('/api/pages/:pageId/blocks/:blockId', deleteBlock)
 app.put('/api/websiteName', isAdmin, [ check('name').isLength({min: 1, max:160}) ], updateName)
-app.put('/api/pages/:pageId/admin', isAdmin, [ check('author').isLength({min: 1, max:160}) ], updateAuthor)
+app.put('/api/admin/:pageId/updateAuthor', isAdmin, [ check('author').isLength({min: 1, max:160}) ], updateAuthor)
+app.get('/api/admin/user/:username', isAdmin, findUser)
 
 app.listen(PORT,
     () => { console.log(`Server started on http://localhost:${PORT}/`) });

@@ -7,6 +7,7 @@ import { PageNotFound } from './PageNotFound';
 import { PagesList, PagesListBackOffice } from './PagesList';
 import { PageWithBlocks } from './Blocks';
 import { AddPageBackOffice } from './AddPage';
+import { ChangeAuthorForm } from './ChangeAuthorForm'
 import { login, getPages, logout, getWebsiteName, deletePage, updateWebsiteName } from './API';
 import UserContext from './context';
 
@@ -68,8 +69,10 @@ function App() {
           <Route index element={<PagesList pages={pages} idUser={user.id}/>} />
           <Route path='/login' element={ <LoginForm doLogin={doLogin}/> }/>
           <Route path='/pages/:pageId' element={<PageWithBlocks />} />
-          <Route path='/backOffice/pages' element={<PagesListBackOffice  pages={pages} handleDeletePage={handleDeletePage} userUsername={user.username} role={user.role}  handleNameSubmit={handleNameSubmit}/>} />
+          <Route path='/backOffice/pages' element={<PagesListBackOffice  pages={pages} userUsername={user.username} role={user.role}
+            handleDeletePage={handleDeletePage}  handleNameSubmit={handleNameSubmit}/>} />
           <Route path='/backOffice/pages/add' element={<AddPageBackOffice setPages={setPages}/>} />
+          <Route path='/backOffice/admin/:pageId/changeAuthor' element={<ChangeAuthorForm setPages={setPages}/>} />
           <Route path='*' element={<PageNotFound />} />
         </Route>
       </Routes>

@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { Link, useNavigate } from 'react-router-dom';
-import { Card, Row, Col, Button, Stack, Form } from 'react-bootstrap';
+import { Card, Row, Col, Button, Stack, Form, ButtonGroup } from 'react-bootstrap';
 import { useState } from 'react';
 import dayjs from 'dayjs';
 
@@ -73,8 +73,12 @@ function PagesListBackOffice (props) {
                                 <Card.Text> Status: {getStatus(page.publication_date)} </Card.Text>
                             </Card.Body>
                             <Card.Footer>
+                                <ButtonGroup>
+                                <Button className="me-2" variant="warning" type="button" style={{ display: (props.role === 'admin') ? 'block' : 'none' }} 
+                                    onClick={() => { navigate(`/backOffice/admin/${page.id}/changeAuthor`) }}>Change Author</Button>
                                 <Button variant="danger" type="button" style={{ display: (props.userUsername === page.author || props.role === 'admin') ? 'block' : 'none' }} 
-                                    onClick={() => { props.handleDeletePage(page.id) }}>Delete Page</Button><br />
+                                    onClick={() => { props.handleDeletePage(page.id) }}>Delete Page</Button>
+                                </ButtonGroup><br /><br />
                                 <Link to={`/pages/${page.id}`}>more details...</Link>
                             </Card.Footer>
                         </Card>

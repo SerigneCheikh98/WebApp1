@@ -157,5 +157,46 @@ async function createPage(page){
     }
 }
 
+async function findUser(username) {
+    try {
+        const response = await fetch(APIURL + `/admin/user/${username}`, {
+            credentials: 'include'
+        });
+        if (response.ok) {
+            const user = await response.json();
+            return user;
+        } else {
+            // if response is not OK
+            const e = await response.json();
+            throw new Error(e.error);
+        }
+    } catch (error) {
+        throw new Error(error.message, { cause: error })
+    }
+}
 
-export { getPages, login, getPageWithBlocks, logout, getWebsiteName, deletePage, updateWebsiteName, createPage};
+async function changeAuthor(pageId, username){
+    try {
+        const response = await fetch(APIURL + `/admin/${pageId}/updateAuthor`, {
+            method: 'PUT',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                author: username
+            })
+        });
+
+        if (response.ok) {
+            return {};
+        } else {
+            const e = await response.json();
+            throw new Error(e.error);
+        }
+    } catch (error) {
+        throw new Error(error.message, { cause: error });
+    }
+}
+
+export { getPages, login, getPageWithBlocks, logout, getWebsiteName, deletePage, updateWebsiteName, createPage, findUser, changeAuthor};

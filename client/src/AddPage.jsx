@@ -1,6 +1,6 @@
 /* eslint-disable react/prop-types */
 import { useState } from 'react';
-import { Form, Button, Container, Row, Col, Toast } from 'react-bootstrap';
+import { Form, Button, Container, Row, Col, Toast, Image } from 'react-bootstrap';
 import { createPage, getPages } from './API'
 import { useNavigate } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
@@ -17,7 +17,10 @@ const AddPageBackOffice = (props) => {
         ],
     });
     const [ErrorMsg, setErrorMsg] = useState('') ;
+    const [selectedImages, setSelectedImages] = useState([]);
     const navigate = useNavigate();
+
+    const pathImages = ['/abstract-banner.jpg', '/commercionetwork.png', '/ferris-happy.svg', '/senegal-can22.jpg', '/windows-11.jpg'];
 
     const handleChange = (e, index) => {
         const { name, value } = e.target;
@@ -35,6 +38,13 @@ const AddPageBackOffice = (props) => {
                 return { ...prevPage, blocks };
             });
         }
+    };
+
+    const handleImage = (e, index) => {
+        const updatedImages = [...selectedImages];
+        updatedImages[index] = e.target.value;
+        setSelectedImages(updatedImages);
+        handleChange(e, index);
     };
 
     const handleDatePickerChange = (date) => {
@@ -116,7 +126,18 @@ const AddPageBackOffice = (props) => {
                                     </Form.Select>
                                 </Col>
                                 <Col md={6}>
-                                    <Form.Control as="textarea" rows={3} name="content" value={block.content} onChange={e => handleChange(e, index)} />
+                                    {block.type === 'Image'? 
+                                        <Form.Select value={selectedImages[index]} name="content" onChange={(e) => {handleImage(e, index) }}>
+                                            <option value="">Select an image</option>
+                                            {pathImages.map((path, index) => (
+                                                <option key={index} value={path}>{path.slice(1, path.lastIndexOf('.'))}</option>//ignore the / and extension
+                                            ))}
+                                        </Form.Select> :
+                                        <Form.Control as="textarea" rows={3} name="content" value={block.content} onChange={e => handleChange(e, index)} />
+                                    }<br />
+                                    {block.type === 'Image' && selectedImages[index] && (
+                                        <Image src={selectedImages[index]} rounded  style={{ width: '300px', height: 'auto' }}/>
+                                    )}
                                 </Col>
                                 <Col>
                                     <Form.Control type="number" name="position" min={1} max={page.blocks.length} value={block.position} onChange={e => handleChange(e, index)} />
