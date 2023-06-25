@@ -7,6 +7,7 @@ import { PageNotFound } from './PageNotFound';
 import { PagesList, PagesListBackOffice } from './PagesList';
 import { PageWithBlocks } from './Blocks';
 import { AddPageBackOffice } from './AddPage';
+import { EditPageBackOffice } from './EditPage';
 import { ChangeAuthorForm } from './ChangeAuthorForm'
 import { login, getPages, logout, getWebsiteName, deletePage, updateWebsiteName } from './API';
 import UserContext from './context';
@@ -29,18 +30,6 @@ function App() {
       setWebName(n.name);
 
       getPages().then((allPages) => {
-        // const filteredPages = allPages.filter((page) =>
-        //   dayjs(page.publication_date).isSame(dayjs(), 'day') ||
-        //   dayjs(page.publication_date).isBefore(dayjs(), 'day')
-        // );
-
-        // if (!user.id) {
-        //   // anonymous user
-        //   setPages(filteredPages);
-        // }
-        // else {
-        //   setPages(allPages);
-        // }
         setPages(allPages);
       })
     })
@@ -68,10 +57,11 @@ function App() {
         <Route element={<MainLayout doLogout={handleLogout} webName={webName}/>}>
           <Route index element={<PagesList pages={pages} idUser={user.id}/>} />
           <Route path='/login' element={ <LoginForm doLogin={doLogin}/> }/>
-          <Route path='/pages/:pageId' element={<PageWithBlocks />} />
+          <Route path='/pages/:pageId' element={<PageWithBlocks idUser={user.id} userUsername={user.username} role={user.role}/>} />
           <Route path='/backOffice/pages' element={<PagesListBackOffice  pages={pages} userUsername={user.username} role={user.role}
             handleDeletePage={handleDeletePage}  handleNameSubmit={handleNameSubmit}/>} />
           <Route path='/backOffice/pages/add' element={<AddPageBackOffice setPages={setPages}/>} />
+          <Route path='/backOffice/pages/:pageId/edit' element={<EditPageBackOffice setPages={setPages}/>} />
           <Route path='/backOffice/admin/:pageId/changeAuthor' element={<ChangeAuthorForm setPages={setPages}/>} />
           <Route path='*' element={<PageNotFound />} />
         </Route>
@@ -82,7 +72,6 @@ function App() {
 
 function MainLayout(props) {
   const user = useContext(UserContext);
-  console.log(user)
   return <>
     <header>
       <Navbar sticky="top" variant='dark' bg="dark" expand="lg" className='mb-3'>

@@ -1,10 +1,10 @@
 /* eslint-disable react/prop-types */
 import { useParams, useNavigate } from "react-router-dom";
-import { Button, Image, Row, Col, Badge, Card } from "react-bootstrap";
+import { Button, Image, Row, Col, Badge, Card, ButtonGroup } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import { getPageWithBlocks } from "./API";
 
-function PageWithBlocks() {
+function PageWithBlocks(props) {
     const { pageId } = useParams();
     const navigate = useNavigate();
 
@@ -20,9 +20,16 @@ function PageWithBlocks() {
     }, [pageId]);
 
     return <div>
-        <PageInfos page={pageInfo} /><br></br>
+        <PageInfos page={pageInfo} /><br />
         <BlocksTable blocks={blocks} /><br />
-        <p><Button variant="secondary" onClick={() => { navigate('/') }}>CLOSE</Button></p>
+        <ButtonGroup>
+            { props.idUser && (props.userUsername===pageInfo.author || props.role==='admin') &&
+            <Button className="me-2" variant="primary" onClick={() => { 
+                navigate(`/backOffice/pages/${pageId}/edit`, {state: {pageInfo: pageInfo, blocks: blocks}}) 
+            }}>EDIT</Button> 
+            }
+            <Button variant="secondary" onClick={() => { navigate('/') }}>CLOSE</Button>
+        </ButtonGroup>
     </div>
 
 }
@@ -65,16 +72,6 @@ function BlocksTable(props) {
             </Card.Body>
         </Card>
     );
-    //     <Card>
-    //       <ListGroup variant="flush">
-    //         {orderedBlocks.map((block) => (
-    //           <ListGroup.Item key={block.id} style={{border: 0}}>
-    //             {   block.type === 'Image' ? <Image src={block.content} rounded /> : block.content }
-    //           </ListGroup.Item>
-    //         ))}
-    //       </ListGroup>
-    //     </Card>
-    // );
 }
 
 export { PageWithBlocks };

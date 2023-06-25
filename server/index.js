@@ -51,7 +51,7 @@ app.use(passport.authenticate('session'));
 
 // Serializing user in the session
 passport.serializeUser((user, callback) => {
-    callback(null, { id: user.id, username: user.username });
+    callback(null, { id: user.id, username: user.username, role: user.role });
 });
 // Deserializing user from the session
 passport.deserializeUser((user, callback) => {
@@ -198,7 +198,6 @@ const getName = async (req, res) => {
         }
         res.status(200).json(webName);
     } catch (error) {
-        console.log(error)
         res.status(500).send(error.message);
     }
 }
@@ -252,21 +251,6 @@ const createPage = async (req, res) => {
         
         let newBlock;
 
-        /*blocks.forEach( b => {
-            newBlock = new Block(
-                null,
-                b.type,
-                b.content,
-                data.id,
-            );
-            pagesDao.createBlock(newBlock).then((blockId) =>{
-                console.log(blockId);
-                blockIds.push({ id: blockId });
-            }).catch((err) => {
-                // TODO do i have to revert the work done to this point? 
-                res.status(503).json({ error: `Database error during the creation of new Block: ${err}` });
-            });
-        });*/
         const blockIds = await Promise.all(blocks.map(async (b) => {
             newBlock = new Block(
                 null,
@@ -391,19 +375,6 @@ const findUser = async (req, res)  => {
     }
 }
 
-const getBlock = async (req, res) => {
-}
-
-const createBlock = async (req, res) => {
-}
-
-const editBlock = async (req, res) => {
-}
-
-const deleteBlock = async (req, res) => {
-}
-
-
 app.post('/api/pages', [
     check('title').isLength({ min: 1, max: 160 }),
     // date in the YYYY-MM-DD format
@@ -434,9 +405,11 @@ app.put('/api/pages/:pageId',isAuthor, [
     // date in the YYYY-MM-DD format
     check('publication_date').isLength({min: 10, max: 10}).isISO8601({strict: true}).optional({checkFalsy: true}),
     check('updateBlocks').custom((b) => {
-        // cannot change block type
         if (Array.isArray(b)) {
             b.forEach((b) => {
+                if(!b.type || !b.type.trim().length === 0){
+                    throw new Error('updateBlocks: invalid type');
+                }
                 if(!b.id || isNaN(Number(b.id))){
                     throw new Error('updateBlocks: invalid id');
                 }
@@ -478,10 +451,6 @@ app.put('/api/pages/:pageId',isAuthor, [
     }),
 ], editPage);
 app.delete('/api/pages/:pageId', isAuthor, [ check('pageId').isInt() ], deletePage)
-app.get('/api/pages/:pageId/blocks/:blockId', getBlock)
-app.post('/api/pages/:pageId/blocks', createBlock)
-app.put('/api/pages/:pageId/blocks/:blockId', editBlock)
-app.delete('/api/pages/:pageId/blocks/:blockId', deleteBlock)
 app.put('/api/websiteName', isAdmin, [ check('name').isLength({min: 1, max:160}) ], updateName)
 app.put('/api/admin/:pageId/updateAuthor', isAdmin, [ check('author').isLength({min: 1, max:160}) ], updateAuthor)
 app.get('/api/admin/user/:username', isAdmin, findUser)

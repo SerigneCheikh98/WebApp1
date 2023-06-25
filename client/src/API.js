@@ -145,7 +145,6 @@ async function createPage(page){
         });
         if(response.ok){
             const page = await response.json();
-            console.log(page);
             return page;
         }
         else{
@@ -199,4 +198,26 @@ async function changeAuthor(pageId, username){
     }
 }
 
-export { getPages, login, getPageWithBlocks, logout, getWebsiteName, deletePage, updateWebsiteName, createPage, findUser, changeAuthor};
+async function editPage(pageId, page){
+    try {
+        const response = await fetch(APIURL + `/pages/${pageId}`, {
+            method: 'PUT',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(page)
+        });
+
+        if (response.ok) {
+            return {};
+        } else {
+            const e = await response.json();
+            throw new Error(e.error);
+        }
+    } catch (error) {
+        throw new Error(error.message, { cause: error });
+    }
+}
+
+export { getPages, login, getPageWithBlocks, logout, getWebsiteName, deletePage, updateWebsiteName, createPage, findUser, changeAuthor, editPage};

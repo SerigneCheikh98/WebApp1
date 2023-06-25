@@ -90,9 +90,9 @@ exports.updatePage = (pageId, page, updateBlocks, deleteBlocks, addBlocks) => {
           }
           else {
             //update blocks
-            const updateBlock = `UPDATE Blocks SET content=?, position=? WHERE id=? AND idPage=?`;
+            const updateBlock = `UPDATE Blocks SET type=?, content=?, position=? WHERE id=? AND idPage=?`;
             updateBlocks.forEach(b => {
-              db.run(updateBlock, [b.content, b.position, b.id, pageId], (err) => {
+              db.run(updateBlock, [b.type, b.content, b.position, b.id, pageId], (err) => {
                 if (err) {
                   reject(err)
                 }
