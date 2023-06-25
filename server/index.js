@@ -158,18 +158,6 @@ const getAllPages = async (req, res) => {
     }
 }
 
-const getAllBlocks = async (req, res) => {
-    const pageId = req.params.pageId;
-
-    try {
-        const blocks = await pagesDao.getAllBlocksByPage(pageId);
-
-        res.status(200).json(blocks);
-    } catch (error) {
-        res.status(500).send(error.message);
-    }
-}
-
 // returns a Page with all related blocks
 const getPage = async (req, res) => {
     // check for validation error
@@ -204,7 +192,6 @@ const getName = async (req, res) => {
 
 app.get('/api/pages', getAllPages)
 app.get('/api/pages/:pageId', [ check('pageId').isInt() ], getPage)
-app.get('/api/pages/:pageId/blocks', getAllBlocks)
 app.get('/api/websiteName', getName)
 /******************** Back-office APIs ********************/
 // middleware for the APIs below
